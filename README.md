@@ -18,8 +18,6 @@
 ```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST```
 
 <h2>Notebook</h2>
-load_data![load_data](https://user-images.githubusercontent.com/5565266/126291390-8033c261-6af0-4ba1-99bb-85080a4c9f78.png)
-
 long/short backtest![long/short backtest](https://user-images.githubusercontent.com/5565266/126291402-b9bd2ec3-89db-4ff0-a93d-0fc956528fa1.png)
 
 find_best_combination![find_combination](https://user-images.githubusercontent.com/5565266/126291419-60f09cbd-e85d-4dd0-9686-20edc8d0189e.png)
