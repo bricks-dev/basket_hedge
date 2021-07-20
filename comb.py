@@ -2,11 +2,11 @@ import math
 from backtest import backtest
 from itertools import permutations
 
-def find_combinations(data, symbols, min_sharp=1.5):
-    # 对所有的输入的symbols 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
+def find_combinations(data, coins, min_sharp=1.5):
+    # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     tag = {}
-    symbols = [s for s in symbols if data[s] is not None and data[s].shape[0]>300]
-    for (longsymbol, shortsymbol) in permutations(symbols,2):
+    coins = [s for s in coins if data[s] is not None and data[s].shape[0]>300]
+    for (longsymbol, shortsymbol) in permutations(coins,2):
         k, sharp = backtest(data, [longsymbol], [shortsymbol])
         if not math.isnan(sharp) and sharp > min_sharp:
             tag[k] = sharp

@@ -5,10 +5,10 @@ from plot import plot_line
 from util import key, logreturn_df, mdd
 
 
-def backtest(data, longsymbols, shortsymbols, log=False, draw=False):
-    logreturn = logreturn_df(data, longsymbols, shortsymbols)
-    logreturn['long'] = logreturn[longsymbols].mean(axis=1)
-    logreturn['short'] = logreturn[shortsymbols].mean(axis=1)
+def backtest(data, long_coins, short_coins, log=False, draw=False):
+    logreturn = logreturn_df(data, long_coins, short_coins)
+    logreturn['long'] = logreturn[long_coins].mean(axis=1)
+    logreturn['short'] = logreturn[short_coins].mean(axis=1)
     logreturn['return'] = logreturn['long'] - logreturn['short']
     result = logreturn.filter(['return'], axis=1)
     cumresult = result.cumsum()
@@ -23,7 +23,7 @@ def backtest(data, longsymbols, shortsymbols, log=False, draw=False):
     minv = cumresult['return'].min()
     maxv = cumresult['return'].max()
     sharp = np.mean(daily_return)/np.std(daily_return)* (days**0.5)
-    k = f"long:[{key(longsymbols)}],short:[{key(shortsymbols)}]"
+    k = f"long:[{key(long_coins)}],short:[{key(short_coins)}]"
     if log:
         print(f"{k}, min:{minv} max:{maxv}({100*(math.e**maxv-1)}%), mdd:{maxdrawdown}, sharp:{sharp}")
     if draw:
