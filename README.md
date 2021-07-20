@@ -21,7 +21,8 @@
 
 long/short backtest![long/short backtest](https://user-images.githubusercontent.com/5565266/126291402-b9bd2ec3-89db-4ff0-a93d-0fc956528fa1.png)
 
-find_best_combination![find_combination](https://user-images.githubusercontent.com/5565266/126291419-60f09cbd-e85d-4dd0-9686-20edc8d0189e.png)
+find_combination![find_combination](https://user-images.githubusercontent.com/5565266/126302906-a3558823-c016-473e-9841-76b6ec5af436.png)
+
 
 
 
