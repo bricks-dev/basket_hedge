@@ -12,10 +12,10 @@
 
 ## 最佳组合
 
-输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。为了加快回测速度暂时改为 long/short 列表长度为1，可以很容易改为大于1。
+输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。第一个参数是 coins 列表， 第2/3个参数分别是long/short coins 数量。为了避免回测太慢，这两个数字不应该设置的很大。 
 
 
-```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST```
+```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 ```
 
 <h2>Notebook</h2>
 
