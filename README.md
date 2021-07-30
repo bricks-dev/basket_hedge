@@ -15,7 +15,7 @@
 输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。第一个参数是 coins 列表， 第2/3个参数分别是long/short coins 数量。为了避免回测太慢，这两个数字不应该设置的很大。 
 
 
-```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 ```
+```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 -t 4h -s 2.0 ```
 
 <h2>Notebook</h2>
 

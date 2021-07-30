@@ -42,12 +42,13 @@ def main():
     parser.add_argument('m', help='num of long coins', default='1',type=int)
     parser.add_argument('n', help='num of short coins', default='1',type=int)
     parser.add_argument('-t', '--timeframe', help='timeframe of ohlcv, 1d/4h/1h/15m/1m', default='1d')
+    parser.add_argument('-s', '--sharp', help='threshold of sharp ratio', default=1.5,type=float)
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     assert args.m + args.n <= len(coins), "make sure m + n <= len of coins list"
     data = get_all_price(coins, args.timeframe)
-    find_combinations(data, coins, args.m, args.n)
+    find_combinations(data, coins, args.m, args.n, min_sharp=args.sharp)
 
 
 if __name__ == '__main__':
