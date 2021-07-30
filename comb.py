@@ -1,27 +1,32 @@
 import math
 from backtest import backtest
-from itertools import permutations
+from itertools import permutations, repeat
+from multiprocessing import Pool, cpu_count
+import argparse
+from data import get_all_price
+from backtest import backtest
+
 
 def find_combinations(data, coins, m=1, n=1, min_sharp=1.5):
     # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     # m 是 long_coins 数量, n 是 short_coins 数量 
     assert m+n <= len(data), "make sure m+n <= num of coins"
-    tag = {}
+    p = Pool(cpu_count())
     coins = [s for s in coins if data[s] is not None and data[s].shape[0]>300]
+    longs = []
+    shorts = []
     for item in permutations(coins, m+n):
         item = list(item) # tuple to list 
-        # long list -> item[:m], short list -> item[m:]
-        k, sharp = backtest(data, item[:m], item[m:])
+        longs.append(item[:m])
+        shorts.append(item[m:])
+    result = p.starmap(backtest, zip(repeat(data), longs, shorts))
+    tag = {}
+    for (k, sharp) in result:
         if not math.isnan(sharp) and sharp > min_sharp:
             tag[k] = sharp
     sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1], reverse=True)}
     print(sortedtag)
     return sortedtag
-
-
-import argparse
-from data import get_all_price
-from backtest import backtest
 
 
 def main():
