@@ -15,7 +15,7 @@ def backtest(data, long_coins, short_coins, log=False, draw=False):
     return_tmp = cumresult['return'].dropna().to_numpy()
     return_list = list(return_tmp)
     days = len(return_list)
-    daily_return = np.array([math.e**(y-x)-1 for x,y in zip(return_list,return_list[1:])])
+    daily_return = np.array([(math.e**(y-x)-1)/2 for x,y in zip(return_list,return_list[1:])])
     maxdrawdown = mdd(return_tmp)
     if not maxdrawdown:
         return 
