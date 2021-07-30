@@ -1,4 +1,5 @@
 import math
+import tqdm
 from backtest import backtest
 from itertools import permutations, repeat
 from multiprocessing import Pool, cpu_count
@@ -11,6 +12,7 @@ def find_combinations(data, coins, m=1, n=1, min_sharp=1.5):
     # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     # m 是 long_coins 数量, n 是 short_coins 数量 
     assert m+n <= len(data), "make sure m+n <= num of coins"
+    print("start find_combinations ...")
     p = Pool(cpu_count())
     coins = [s for s in coins if data[s] is not None and data[s].shape[0]>300]
     longs = []
@@ -19,7 +21,8 @@ def find_combinations(data, coins, m=1, n=1, min_sharp=1.5):
         item = list(item) # tuple to list 
         longs.append(item[:m])
         shorts.append(item[m:])
-    result = p.starmap(backtest, zip(repeat(data), longs, shorts))
+    inputs = zip(repeat(data), longs, shorts)
+    result = p.starmap(backtest, tqdm.tqdm(inputs, total=len(longs)))
     tag = {}
     for (k, sharp) in result:
         if not math.isnan(sharp) and sharp > min_sharp:
