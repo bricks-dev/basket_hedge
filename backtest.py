@@ -34,4 +34,4 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5):
         plt.style.use('fivethirtyeight')
         value['total'].plot(figsize=(12,8), title=title)
         plt.show()
-    return k, sharp
+    return k, maxdd, sharp
