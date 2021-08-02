@@ -18,7 +18,7 @@ def main():
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     coins = long_coins + short_coins
     data = get_all_price(coins, args.timeframe)
-    backtest(data, long_coins, short_coins, True, True)
+    backtest(data, long_coins, short_coins, True)
 
 
 if __name__ == '__main__':

@@ -1,31 +1,36 @@
-import numpy as np
-import math
+import pandas as pd
+from util import key, mdd
 
-from plot import plot_line
-from util import key, logreturn_df, mdd
+def calc_pos(data, coin, alloc, is_long=True):
+    df = data[coin]
+    if is_long:
+        df['norm_return'] = df['close']/df.iloc[0]['close']
+    else:
+        df['norm_return'] = 2 - df['close']/df.iloc[0]['close']
+    df['position'] = df['norm_return'] * alloc
+    return df['position']
+    
 
-
-def backtest(data, long_coins, short_coins, log=False, draw=False):
-    logreturn = logreturn_df(data, long_coins, short_coins)
-    logreturn['long'] = logreturn[long_coins].mean(axis=1)
-    logreturn['short'] = logreturn[short_coins].mean(axis=1)
-    logreturn['return'] = logreturn['long'] - logreturn['short']
-    result = logreturn.filter(['return'], axis=1)
-    cumresult = result.cumsum()
-    return_tmp = cumresult['return'].dropna().to_numpy()
-    return_list = list(return_tmp)
-    days = len(return_list)
-    daily_return = np.array([(math.e**(y-x)-1)/2 for x,y in zip(return_list,return_list[1:])])
-    maxdrawdown = mdd(return_tmp)
-    if not maxdrawdown:
-        return 
-    final = cumresult['return'].iat[-1]
-    minv = cumresult['return'].min()
-    maxv = cumresult['return'].max()
-    sharp = np.mean(daily_return)/np.std(daily_return)* (days**0.5)
+def backtest(data, long_coins, short_coins, plot=False):
+    all_pos = {}
+    index = data[long_coins[0]].opentime # time
+    alloc1 = 0.5/len(long_coins) # money allocated to each symbol at first
+    alloc2 = 0.5/len(short_coins) # money allocated to each symbol at first
+    for coin in long_coins:
+        all_pos[coin] = calc_pos(data, coin, alloc1, True)
+    for coin in short_coins:
+        all_pos[coin] = calc_pos(data, coin, alloc2, False)
+    value = pd.DataFrame(all_pos)
+    value.index = index
+    value['total'] = value.sum(axis=1)
+    value['daily_return'] = value['total'].pct_change(1)
+    sharp = (365**0.5)*value['daily_return'].mean() / value['daily_return'].std()
+    maxdd = mdd(value.total)
     k = f"long:[{key(long_coins)}],short:[{key(short_coins)}]"
-    if log:
-        print(f"{k}, min:{minv} max:{maxv}({100*(math.e**maxv-1)}%), mdd:{maxdrawdown}, sharp:{sharp}")
-    if draw:
-        plot_line(cumresult)
+    title = f"{k}, sharp: {sharp}, mdd:{maxdd}"
+    if plot:
+        import matplotlib.pyplot as plt
+        plt.style.use('fivethirtyeight')
+        value['total'].plot(figsize=(12,8), title=title)
+        plt.show()
     return k, sharp
