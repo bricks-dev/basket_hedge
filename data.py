@@ -1,35 +1,7 @@
-import requests
-import pandas as pd
-from datetime import datetime
 from time import sleep
 from multiprocessing import Pool, cpu_count
 from itertools import repeat
-# use binance as data source
-
-def get_symbols():
-    r = requests.get("https://api.binance.com/api/v3/exchangeInfo")
-    if not r:
-        print("data empty")
-        return None
-    d = r.json()['symbols']
-    return [item['symbol'].replace("USDT","") for item in d if 'USDT' in item['symbol']]
-
-def get_price(coin, period):
-    print(f"get_price for {coin} ...")
-    symbol = f'{coin.upper()}USDT'
-    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={period}"
-    r = requests.get(url)
-    if not r:
-        print("data empty")
-        return None
-    d = r.json()
-    df = pd.DataFrame(d, columns=['opentime','open','high','low',
-                              'close','volume','closetime',
-                              'vcoin','count','buyvolume','buycoin','ignore'])
-    df['opentime'] = pd.to_datetime(df['opentime'], unit='ms')
-    df['close'] = df['close'].astype(float)
-    df.set_index('opentime')
-    return df
+from binance import get_price
 
 def chunks(a, n):
     k, m = divmod(len(a), n)
@@ -45,6 +17,7 @@ def task(coins, period, wait=0.3):
     return data
 
 def get_all_price(coins, period='4h'):  
+    # use binance as data source
     data = {}
     batch_symbols = list(chunks(coins, cpu_count()))
     print(f"get_all_prices create batch tasks: {batch_symbols}")
