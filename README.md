@@ -5,10 +5,15 @@
 
 ## 回测
 
-回测 long/short 组合的收益，第一个参数是 long_coins，第二个参数是 short_coins，用逗号分隔。 
+回测 long/short 组合的收益
+
+* 第一个参数是 long_coins，用逗号分隔
+* 第二个参数是 short_coins，用逗号分隔
+* -t 4h 获取k线数据的粒度
+* -a 0.5 分配给多/空组合的资金比例，默认为各50%，小于0.5也就是使用部分资金
 
 
-```python hedge.py BTC,ETH XRP,TRX```
+```python hedge.py BTC,ETH XRP,TRX -t 4h -a 0.25```
 
 ## 最佳组合
 

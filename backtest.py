@@ -11,18 +11,19 @@ def calc_pos(data, coin, alloc, is_long=True):
     return df['position']
     
 
-def backtest(data, long_coins, short_coins, plot=False):
+def backtest(data, long_coins, short_coins, plot=False, allocate=0.5):
     all_pos = {}
     index = data[long_coins[0]].opentime # time
-    alloc1 = 0.5/len(long_coins) # money allocated to each symbol at first
-    alloc2 = 0.5/len(short_coins) # money allocated to each symbol at first
+    alloc1 = allocate/len(long_coins) # money allocated to each symbol at first
+    alloc2 = allocate/len(short_coins) # money allocated to each symbol at first
+    not_used_money = 1 - 2*allocate
     for coin in long_coins:
         all_pos[coin] = calc_pos(data, coin, alloc1, True)
     for coin in short_coins:
         all_pos[coin] = calc_pos(data, coin, alloc2, False)
     value = pd.DataFrame(all_pos)
     value.index = index
-    value['total'] = value.sum(axis=1)
+    value['total'] = value.sum(axis=1) + not_used_money
     value['daily_return'] = value['total'].pct_change(1)
     sharp = (365**0.5)*value['daily_return'].mean() / value['daily_return'].std()
     maxdd = mdd(value.total)
