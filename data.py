@@ -19,7 +19,8 @@ def task(coins, period, wait=0.3):
 def get_all_price(coins, period='4h'):  
     # use binance as data source
     data = {}
-    batch_symbols = list(chunks(coins, cpu_count()))
+    process_num = min(cpu_count(), len(coins))
+    batch_symbols = list(chunks(coins, process_num))
     print(f"get_all_prices create batch tasks: {batch_symbols}")
     p = Pool(cpu_count())
     result = p.starmap(task, zip(batch_symbols, repeat(period)))
