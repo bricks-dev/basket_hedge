@@ -1,7 +1,7 @@
 import math
 import tqdm
 from backtest import backtest
-from itertools import permutations, repeat
+from itertools import combinations, repeat
 from multiprocessing import Pool, cpu_count
 import argparse
 from data import get_all_price
@@ -32,10 +32,11 @@ def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, drawdown=-0.1, alloc
     coins = get_valid_coins(data, coins, valid_size)
     longs = []
     shorts = []
-    for item in permutations(coins, m+n):
-        item = list(item) # tuple to list 
-        longs.append(item[:m])
-        shorts.append(item[m:])
+    for com in combinations(coins, m+n):
+        com_list = list(com) 
+        for item in combinations(com_list, m): # tuple to list 
+            longs.append(list(item))
+            shorts.append(list(set(com_list) - set(item)))
     inputs = zip(repeat(data), longs, shorts, repeat(False), repeat(allocate))
     result = p.starmap(backtest, tqdm.tqdm(inputs, total=len(longs)))
     tag = {}
