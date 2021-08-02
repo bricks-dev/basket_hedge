@@ -8,13 +8,28 @@ from data import get_all_price
 from backtest import backtest
 
 
+def get_valid_size(data):
+    max_size = 0
+    for df in data.values():
+        if df.shape[0] > max_size:
+            max_size = df.shape[0]
+    return max_size
+
+def get_valid_coins(data, coins, valid_size):
+    valid_coins = [s for s in coins if data[s] is not None and data[s].shape[0]>=valid_size]
+    invalid_coins = set(coins) - set(valid_coins)
+    print(f"invalid_coins: {invalid_coins}, data size not valid")
+    return valid_coins
+
+
 def find_combinations(data, coins, m=1, n=1, min_sharp=1.5):
     # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     # m 是 long_coins 数量, n 是 short_coins 数量 
     assert m+n <= len(data), "make sure m+n <= num of coins"
     print("start find_combinations ...")
     p = Pool(cpu_count())
-    coins = [s for s in coins if data[s] is not None and data[s].shape[0]>300]
+    valid_size = get_valid_size(data)
+    coins = get_valid_coins(data, coins, valid_size)
     longs = []
     shorts = []
     for item in permutations(coins, m+n):
