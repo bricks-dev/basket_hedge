@@ -35,7 +35,7 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     sharp = (365**0.5)*value['daily_return'].mean() / value['daily_return'].std()
     maxdd = mdd(value.total)
     k = f"long:[{key(long_coins)}],short:[{key(short_coins)}]"
-    title = f"{k}, sharp: {sharp}, mdd:{maxdd}"
+    title = f"{k}, sharp: {round(sharp,2)}, mdd:{round(maxdd*100,2)}%"
     if plot:
         import matplotlib.pyplot as plt
         plt.style.use('fivethirtyeight')
