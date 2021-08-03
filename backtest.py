@@ -1,5 +1,5 @@
 import pandas as pd
-from util import key, mdd
+from util import key, MDD, CAGR, percentf
 
 def calc_pos(data, coin, alloc, is_long=True):
     df = data[coin]
@@ -33,12 +33,16 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     value['total'] = value.sum(axis=1) + not_used_money
     value['daily_return'] = value['total'].pct_change(1)
     sharp = (365**0.5)*value['daily_return'].mean() / value['daily_return'].std()
-    maxdd = mdd(value.total)
+    mdd = MDD(value.total)
+    coin = data[long_coins[0]]
+    periods = ((coin.iloc[-1].opentime - coin.iloc[0].opentime).days + 1)/365 
+    cagr = CAGR(value.iloc[0]['total'], value.iloc[-1]['total'], periods)
+    calmar = abs(cagr/mdd)
     k = f"long:[{key(long_coins)}],short:[{key(short_coins)}]"
-    title = f"{k}, sharp: {round(sharp,2)}, mdd:{round(maxdd*100,2)}%"
+    title = f"{k}, Sharpe: {round(sharp,2)}, Calmar:{round(calmar,2)}, MDD:{percentf(mdd)}, CAGR:{percentf(cagr)}"
     if plot:
         import matplotlib.pyplot as plt
         plt.style.use('fivethirtyeight')
         value['total'].plot(figsize=(12,8), title=title)
         plt.show()
-    return k, maxdd, sharp
+    return k, sharp, calmar, mdd, cagr
