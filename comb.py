@@ -22,7 +22,7 @@ def get_valid_coins(data, coins, valid_size):
     return valid_coins
 
 
-def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, drawdown=-0.1, allocate=0.5):
+def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, drawdown=-1, allocate=0.5):
     # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     # m 是 long_coins 数量, n 是 short_coins 数量 
     assert m+n <= len(data), "make sure m+n <= num of coins"
@@ -59,7 +59,7 @@ def main():
     parser.add_argument('n', help='num of short coins', default='1',type=int)
     parser.add_argument('-t', '--timeframe', help='timeframe of ohlcv, 1d/4h/1h/15m/1m', default='1d')
     parser.add_argument('-s', '--sharp', help='threshold of sharp ratio', default=1.5,type=float)
-    parser.add_argument('-d', '--drawdown', help='threshold of max drawdown', default=-0.1,type=float)
+    parser.add_argument('-d', '--drawdown', help='threshold of max drawdown', default=-1,type=float)
     parser.add_argument('-a', '--allocate', help='allocate percentage o init money', default=0.5,type=float)
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
