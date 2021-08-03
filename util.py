@@ -13,9 +13,9 @@ def MDD(data : pd.Series):
 def CAGR(first, last, periods):
     rate = last/first
     if rate > 0:
-        return (last/first)**(1/periods)-1
+        return rate**(1/periods)-1
     else:
-        return -((1-last/first)**(1/periods) - 1)
+        return -((1-rate)**(1/periods) - 1)
 
 def key(symbols):
     return ",".join(symbols)
