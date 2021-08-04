@@ -6,30 +6,15 @@ from multiprocessing import Pool, cpu_count
 import argparse
 from data import get_all_price
 from backtest import backtest
+from util import get_valid_coins
 
 
-def get_valid_size(data):
-    max_size = 0
-    for df in data.values():
-        if df.shape[0] > max_size:
-            max_size = df.shape[0]
-    return max_size
-
-def get_valid_coins(data, coins, valid_size):
-    valid_coins = [s for s in coins if data[s] is not None and data[s].shape[0]>=valid_size]
-    invalid_coins = set(coins) - set(valid_coins)
-    print(f"invalid_coins: {invalid_coins}, data size not valid")
-    return valid_coins
-
-
-def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, min_calmar=2.0, drawdown=-1, allocate=0.5):
+def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, min_calmar=2.0, drawdown=-1, allocate=0.5, sortby='sharp'):
     # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
     # m 是 long_coins 数量, n 是 short_coins 数量 
     assert m+n <= len(data), "make sure m+n <= num of coins"
     print("start find_combinations ...")
     p = Pool(cpu_count())
-    valid_size = get_valid_size(data)
-    coins = get_valid_coins(data, coins, valid_size)
     longs = []
     shorts = []
     for com in combinations(coins, m+n):
@@ -40,13 +25,35 @@ def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, min_calmar=2.0, draw
     inputs = zip(repeat(data), longs, shorts, repeat(False), repeat(allocate))
     result = p.starmap(backtest, tqdm.tqdm(inputs, total=len(longs)))
     tag = {}
-    for (k, sharp, calmar, mdd, cagr) in result:
+    for (k, sharp, calmar, mdd, cagr, last) in result:
         if not math.isnan(sharp) and sharp >= min_sharp and mdd >= drawdown and calmar >= min_calmar:
             tag[k] = (sharp, calmar, mdd, cagr)
-    sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1][1], reverse=True)} # sort by calmar
+    sort_index = 0 if sortby == 'sharp' else 1
+    sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1][sort_index], reverse=True)} # sort by calmar
     print(sortedtag)
     return sortedtag
 
+def find_best(data, coins, min_sharp=0, min_calmar=0, drawdown=-1, allocate=0.5, sortby='sharp'):
+    # coins 进行long/short的排列组合，选择出 sharp ratio 符合条件的组合
+    # m 是 long_coins 数量, n 是 short_coins 数量 
+    assert 2 <= len(data), "make sure m+n <= num of coins"
+    p = Pool(cpu_count())
+    longs = []
+    shorts = []
+    for com in combinations(coins, 2):
+        com_list = list(com) 
+        for item in combinations(com_list, 1): # tuple to list 
+            longs.append(list(item))
+            shorts.append(list(set(com_list) - set(item)))
+    inputs = zip(repeat(data), longs, shorts, repeat(False), repeat(allocate))
+    result = p.starmap(backtest, inputs)
+    tag = {}
+    for (k, sharp, calmar, mdd, cagr, last) in result:
+        if not math.isnan(sharp) and sharp >= min_sharp and mdd >= drawdown and calmar >= min_calmar:
+            tag[k] = (sharp, calmar, mdd, cagr)
+    sort_index = 0 if sortby == 'sharp' else 1
+    sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1][sort_index], reverse=True)} # sort by calmar
+    return sortedtag
 
 def main():
     parser = argparse.ArgumentParser(
@@ -67,7 +74,8 @@ def main():
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     assert args.m + args.n <= len(coins), "make sure m + n <= len of coins list"
     data = get_all_price(coins, args.timeframe)
-    find_combinations(data, coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, drawdown=args.drawdown, allocate=args.allocate)
+    valid_coins = get_valid_coins(data, coins)
+    find_combinations(data, valid_coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, drawdown=args.drawdown, allocate=args.allocate)
 
 
 if __name__ == '__main__':
