@@ -26,8 +26,8 @@ def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, min_calmar=2.0, draw
     tag = {}
     for (k, sharp, calmar, mdd, cagr, last) in result:
         if not math.isnan(sharp) and sharp >= min_sharp and mdd >= drawdown and calmar >= min_calmar:
-            tag[k] = (sharp, calmar, mdd, cagr)
-    sort_index = 0 if sortby == 'sharp' else 1
+            tag[k] = (sharp, calmar, mdd, cagr, last)
+    sort_index = {'sharp':0, 'calmar':1, 'mdd':2, 'cagr':3, 'last':4}.get(sortby, 0)
     sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1][sort_index], reverse=True)} # sort by calmar
     print(sortedtag)
     return sortedtag
@@ -49,8 +49,8 @@ def find_best(data, coins, min_sharp=0, min_calmar=0, drawdown=-1, allocate=0.5,
     tag = {}
     for (k, sharp, calmar, mdd, cagr, last) in result:
         if not math.isnan(sharp) and sharp >= min_sharp and mdd >= drawdown and calmar >= min_calmar:
-            tag[k] = (sharp, calmar, mdd, cagr)
-    sort_index = 0 if sortby == 'sharp' else 1
+            tag[k] = (sharp, calmar, mdd, cagr, last)
+    sort_index = {'sharp':0, 'calmar':1, 'mdd':2, 'cagr':3, 'last':4}.get(sortby, 0)
     sortedtag = {k: v for k, v in sorted(tag.items(), key=lambda item: item[1][sort_index], reverse=True)} # sort by calmar
     return sortedtag
 
@@ -68,12 +68,14 @@ def main():
     parser.add_argument('-c', '--calmar', help='threshold of calmar ratio', default=2,type=float)
     parser.add_argument('-d', '--drawdown', help='threshold of max drawdown', default=-1,type=float)
     parser.add_argument('-a', '--allocate', help='allocate percentage o init money', default=0.5,type=float)
+    parser.add_argument('--sort', help='sortby sharp/calmar/mdd/cagr/last', default='sharp')
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     new_coins, data = get_all_price(coins, args.timeframe)
     assert args.m + args.n <= len(new_coins), "make sure m + n <= len of coins list"
-    find_combinations(data, new_coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, drawdown=args.drawdown, allocate=args.allocate)
+    find_combinations(data, new_coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, 
+                    drawdown=args.drawdown, allocate=args.allocate, sortby=args.sort)
 
 
 if __name__ == '__main__':

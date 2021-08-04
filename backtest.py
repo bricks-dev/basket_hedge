@@ -23,7 +23,7 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     alloc2 = parse_alloc(short_coins, allocate, alloc_short)
     assert len(alloc1) == len(long_coins)
     assert len(alloc2) == len(short_coins)
-    not_used_money = 1 - 2*allocate
+    not_used_money = (1 - sum(alloc1) - sum(alloc2)) * init_value
     for coin, alloc in zip(long_coins, alloc1):
         all_pos[coin] = calc_pos(data, coin, alloc, True, init_value)
     for coin, alloc in zip(short_coins, alloc2):
