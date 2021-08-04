@@ -6,7 +6,6 @@ from multiprocessing import Pool, cpu_count
 import argparse
 from data import get_all_price
 from backtest import backtest
-from util import get_valid_coins
 
 
 def find_combinations(data, coins, m=1, n=1, min_sharp=1.5, min_calmar=2.0, drawdown=-1, allocate=0.5, sortby='sharp'):
@@ -72,10 +71,9 @@ def main():
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
-    assert args.m + args.n <= len(coins), "make sure m + n <= len of coins list"
-    data = get_all_price(coins, args.timeframe)
-    valid_coins = get_valid_coins(data, coins)
-    find_combinations(data, valid_coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, drawdown=args.drawdown, allocate=args.allocate)
+    new_coins, data = get_all_price(coins, args.timeframe)
+    assert args.m + args.n <= len(new_coins), "make sure m + n <= len of coins list"
+    find_combinations(data, new_coins, args.m, args.n, min_sharp=args.sharp, min_calmar=args.calmar, drawdown=args.drawdown, allocate=args.allocate)
 
 
 if __name__ == '__main__':

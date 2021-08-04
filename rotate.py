@@ -3,7 +3,6 @@ from datetime import timedelta
 from backtest import backtest
 from data import get_all_price
 import pandas as pd
-from util import get_valid_coins
 from comb import find_best
 from collections import deque, OrderedDict
 
@@ -98,9 +97,7 @@ def main():
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     data = get_all_price(coins, args.timeframe)
-    valid_coins = get_valid_coins(data, coins)
-    print(f"valid coins:{valid_coins}")
-    rotate(data, valid_coins, args.rotate)
+    rotate(data, coins, args.rotate)
 
 
 if __name__ == '__main__':

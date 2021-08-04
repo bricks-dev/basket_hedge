@@ -20,9 +20,9 @@ def main():
     short_coins = args.short_coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     coins = long_coins + short_coins
-    data = get_all_price(coins, args.timeframe)
+    new_coins, data = get_all_price(coins, args.timeframe)
     backtest(data, long_coins, short_coins, True, args.allocate, 
-    alloc_long = args.along, alloc_short=args.ashort)
+    alloc_long = args.along, alloc_short=args.ashort, timeframe=args.timeframe)
 
 
 if __name__ == '__main__':
