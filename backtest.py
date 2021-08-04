@@ -15,7 +15,7 @@ def parse_alloc(coins, alloc, alloc_list):
 
 
 def backtest(data, long_coins, short_coins, plot=False, allocate=0.5, 
-        alloc_long=None, alloc_short=None, init_value=1):
+        alloc_long=None, alloc_short=None, init_value=1, timeframe='1d'):
     all_pos = {}
     index = data[long_coins[0]].opentime # time
     # money allocated to each symbol at first
@@ -32,7 +32,8 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     value.index = index
     value['total'] = value.sum(axis=1) + not_used_money
     value['daily_return'] = value['total'].pct_change(1)
-    sharp = (365**0.5)*value['daily_return'].mean() / value['daily_return'].std()
+    sharp_days_multiple = {'1d':1,'4h':6, '1h':24}.get(timeframe, 1)
+    sharp = ((365*sharp_days_multiple)**0.5)*value['daily_return'].mean() / value['daily_return'].std()
     mdd = MDD(value.total)
     periods = days(data[long_coins[0]])/365 
     first = value.iloc[0]['total']
