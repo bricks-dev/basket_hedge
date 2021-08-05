@@ -4,7 +4,7 @@ from backtest import backtest
 from itertools import combinations, repeat
 from multiprocessing import Pool, cpu_count
 import argparse
-from data import get_all_price
+from data.data import get_all_price
 from backtest import backtest
 
 

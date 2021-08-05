@@ -1,7 +1,7 @@
 from time import sleep
 from multiprocessing import Pool, cpu_count
 from itertools import repeat
-from binance import get_price
+from data.binance import get_price
 
 def chunks(a, n):
     k, m = divmod(len(a), n)

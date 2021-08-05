@@ -1,5 +1,5 @@
 import argparse
-from data import get_all_price
+from data.data import get_all_price
 from backtest import backtest
 
 

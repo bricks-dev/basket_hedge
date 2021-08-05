@@ -1,7 +1,7 @@
 import argparse
 from datetime import timedelta
 from backtest import backtest
-from data import get_all_price
+from data.data import get_all_price
 import pandas as pd
 from comb import find_best
 from collections import deque, OrderedDict

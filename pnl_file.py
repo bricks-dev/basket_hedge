@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from util import key
 import argparse
-from data import get_all_price
+from data.data import get_all_price
 
 def calc_pos(data, coin, alloc, is_long=True, col='close'):
     df = data[coin]
