@@ -23,6 +23,8 @@
 ```python hedge.py BTC,ETH XRP,TRX -t 4h -al 0.1,0.1 -as 0.2,0.1```
 
 
+![long/short](https://user-images.githubusercontent.com/5565266/128318646-5772fbbf-3934-4d48-95bd-bea6884a0449.png)
+
 ###  保存PNL文件
 
 ```python pnl_file.py ETH,BTC,MATIC,THETA BCH,XRP,EOS  -t 1d```
@@ -38,23 +40,9 @@
 ```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 -t 4h -s 2.0 --sort mdd```
 
 
-## 滚动回测/动态组合
-
-每一个月都动态更新当前持仓组合，比如前一段时间(180天)表现最好的是long BTC, short ETH， 则把BTC加入当前long_coins, ETH 加入当前 short_coins。 
-
-```python rotate.py BTC,ETH,BNB,XRP,DOT,UNI,BCH,LTC,SOL,LINK,MATIC,XLM,ETC,THETA -t 1d -r 180```
-
-
-<h2>Notebook</h2>
-
-
-long/short_backtest![long/short](https://user-images.githubusercontent.com/5565266/128318646-5772fbbf-3934-4d48-95bd-bea6884a0449.png)
-
-
-
-find_combination
 
 ```
+result: 
 {
    "ETH;BCH":(2.2971850378327128,10.697037681869743,-0.3530622559417854,3.776720255855218,3.539042150808071),
    "ETH;LINK":(2.347284872948933,9.428492438880879,-0.38648287695921546,3.643950883166892,3.4593249749661985),
@@ -65,5 +53,9 @@ find_combination
 ```
 
 
+## 滚动回测/动态组合
 
+每一个月都动态更新当前持仓组合，比如前一段时间(180天)表现最好的是long BTC, short ETH， 则把BTC加入当前long_coins, ETH 加入当前 short_coins。 
+
+```python rotate.py BTC,ETH,BNB,XRP,DOT,UNI,BCH,LTC,SOL,LINK,MATIC,XLM,ETC,THETA -t 1d -r 180```
 
