@@ -32,8 +32,10 @@
 
 输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。第一个参数是 coins 列表， 第2/3个参数分别是long/short coins 数量。为了避免回测太慢，这两个数字不应该设置的很大。 
 
+* --sort 输出结果按照什么指标排序: mdd, sharp, cagr, calmar
+* -s 输出结果按照sharp ratio 值进行过滤，低于这个值的结果不显示
 
-```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 -t 4h -s 2.0 ```
+```python comb.py BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST 1 1 -t 4h -s 2.0 --sort mdd```
 
 
 ## 滚动回测/动态组合
@@ -45,9 +47,22 @@
 
 <h2>Notebook</h2>
 
-long/short backtest![long/short backtest](https://user-images.githubusercontent.com/5565266/126291402-b9bd2ec3-89db-4ff0-a93d-0fc956528fa1.png)
 
-find_combination![find_combination](https://user-images.githubusercontent.com/5565266/126302906-a3558823-c016-473e-9841-76b6ec5af436.png)
+long/short_backtest![long/short](https://user-images.githubusercontent.com/5565266/128318646-5772fbbf-3934-4d48-95bd-bea6884a0449.png)
+
+
+
+find_combination
+
+```
+{
+   "ETH;BCH":(2.2971850378327128,10.697037681869743,-0.3530622559417854,3.776720255855218,3.539042150808071),
+   "ETH;LINK":(2.347284872948933,9.428492438880879,-0.38648287695921546,3.643950883166892,3.4593249749661985),
+   "SOL;LINK":(2.352933747100389,23.596596911726394,-0.5170894009038323,12.20155016045382,8.048418673530698),
+   "SOL;BCH":(2.357400406263565,23.57270454116125,-0.5244847641365566,12.363524381331697,8.128135849372569),
+   ...
+}
+```
 
 
 
