@@ -1,12 +1,12 @@
 import pandas as pd
 from util import key, MDD, CAGR, percentf, days
 
-def calc_pos(data, coin, alloc, is_long=True, init_value=1):
+def calc_pos(data, coin, alloc, is_long=True, init_value=1, col='close'):
     df = data[coin]
     if is_long:
-        df['norm_return'] = df['close']/df.iloc[0]['close']
+        df['norm_return'] = df[col]/df.iloc[0][col]
     else:
-        df['norm_return'] = 2 - df['close']/df.iloc[0]['close']
+        df['norm_return'] = 2 - df[col]/df.iloc[0][col]
     df['position'] = df['norm_return'] * alloc * init_value
     return df['position']
     
@@ -15,7 +15,7 @@ def parse_alloc(coins, alloc, alloc_list):
 
 
 def backtest(data, long_coins, short_coins, plot=False, allocate=0.5, 
-        alloc_long=None, alloc_short=None, init_value=1, timeframe='1d'):
+        alloc_long=None, alloc_short=None, init_value=1, timeframe='1d', col='close'):
     all_pos = {}
     index = data[long_coins[0]].opentime # time
     # money allocated to each symbol at first
@@ -25,9 +25,9 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     assert len(alloc2) == len(short_coins)
     not_used_money = (1 - sum(alloc1) - sum(alloc2)) * init_value
     for coin, alloc in zip(long_coins, alloc1):
-        all_pos[coin] = calc_pos(data, coin, alloc, True, init_value)
+        all_pos[coin] = calc_pos(data, coin, alloc, True, init_value, col)
     for coin, alloc in zip(short_coins, alloc2):
-        all_pos[coin] = calc_pos(data, coin, alloc, False, init_value)
+        all_pos[coin] = calc_pos(data, coin, alloc, False, init_value, col)
     value = pd.DataFrame(all_pos)
     value.index = index
     value['total'] = value.sum(axis=1) + not_used_money
@@ -43,6 +43,7 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     k = f"{key(long_coins)};{key(short_coins)}"
     title_key = f"long:[{key(long_coins)}];short:[{key(short_coins)}]"
     title = f"{title_key}, Sharpe: {round(sharp,2)}, Calmar:{round(calmar,2)}, MDD:{percentf(mdd)}, CAGR:{percentf(cagr)}"
+
     if plot:
         import matplotlib.pyplot as plt
         plt.style.use('fivethirtyeight')

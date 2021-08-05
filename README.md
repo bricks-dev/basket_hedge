@@ -3,7 +3,7 @@
 [how to calc return](https://romanorac.github.io/cryptocurrency/analysis/2017/12/29/cryptocurrency-analysis-with-python-part3.html )
 
 
-## 回测
+## 简单回测
 
 回测 long/short 组合的收益
 
@@ -23,7 +23,12 @@
 ```python hedge.py BTC,ETH XRP,TRX -t 4h -al 0.1,0.1 -as 0.2,0.1```
 
 
-## 最佳组合
+###  保存PNL文件
+
+```python pnl_file.py ETH,BTC,MATIC,THETA BCH,XRP,EOS  -t 1d```
+
+把简单回测结果保存到./output 文件夹，默认为pickle格式。开发此功能初衷是为了跟海龟策略结合，把basket PNL作为海龟策略的输入。([海龟回测](https://github.com/bricks-dev/backtesting))
+## 寻找最佳组合
 
 输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。第一个参数是 coins 列表， 第2/3个参数分别是long/short coins 数量。为了避免回测太慢，这两个数字不应该设置的很大。 
 

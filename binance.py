@@ -22,6 +22,7 @@ def get_price(coin, period):
                               'close','volume','closetime',
                               'vcoin','count','buyvolume','buycoin','ignore'])
     df['opentime'] = pd.to_datetime(df['opentime'], unit='ms')
-    df['close'] = df['close'].astype(float)
+    for col in ['open', 'high','low','close', 'volume']:
+        df[col] = df[col].astype(float)
     df.set_index('opentime')
     return df
