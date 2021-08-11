@@ -1,13 +1,13 @@
 import pandas as pd
 from util import key, MDD, CAGR, percentf, days
 
-def calc_pos(data, coin, alloc, is_long=True, init_value=1, col='close'):
+def calc_pos(data, coin, init_value, is_long=True, col='close'):
     df = data[coin]
     if is_long:
         df['norm_return'] = df[col]/df.iloc[0][col]
     else:
         df['norm_return'] = 2 - df[col]/df.iloc[0][col]
-    df['position'] = df['norm_return'] * alloc * init_value
+    df['position'] = df['norm_return'] * init_value
     return df['position']
     
 def parse_alloc(coins, alloc, alloc_list):
@@ -25,9 +25,9 @@ def backtest(data, long_coins, short_coins, plot=False, allocate=0.5,
     assert len(alloc2) == len(short_coins)
     not_used_money = (1 - sum(alloc1) - sum(alloc2)) * init_value
     for coin, alloc in zip(long_coins, alloc1):
-        all_pos[coin] = calc_pos(data, coin, alloc, True, init_value, col)
+        all_pos[coin] = calc_pos(data, coin, init_value * alloc, True, col)
     for coin, alloc in zip(short_coins, alloc2):
-        all_pos[coin] = calc_pos(data, coin, alloc, False, init_value, col)
+        all_pos[coin] = calc_pos(data, coin, init_value * alloc, False, col)
     value = pd.DataFrame(all_pos)
     value.index = index
     value['total'] = value.sum(axis=1) + not_used_money

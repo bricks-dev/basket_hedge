@@ -32,9 +32,9 @@ def split_data_rotate(data, coins, freq='30D', rotate_days=180):
     return splits
 
 
-def stage1(data, coins, rotate_days=180):
+def stage1(data, coins, freq_days=7, rotate_days=30):
     print("split data ...")
-    batches = split_data_rotate(data, coins, rotate_days=rotate_days)
+    batches = split_data_rotate(data, coins, freq=f'{freq_days}D',rotate_days=rotate_days)
     best_basket = OrderedDict()
     print("============ stage1: find best basket for each batch =====")
     for i, item in enumerate(batches):
