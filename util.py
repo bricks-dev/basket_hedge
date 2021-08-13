@@ -1,7 +1,8 @@
 import pandas as pd
 from itertools import combinations
+from datetime import timedelta
+from typing import Union
 
-    
 def possible(all_shorts):
     return [list(s) for s in combinations(all_shorts, 3)]
 
@@ -24,8 +25,8 @@ def percentf(val, digits=2):
     return f"{round(val * 100, digits)}%"
 
 
-def days(coin_df):
-    return (coin_df.iloc[-1].opentime - coin_df.iloc[0].opentime).days + 1
+def days(coin_df: Union[pd.Series, pd.DataFrame]):
+    return (coin_df.index[-1] - coin_df.index[0]).days + 1
 
 def get_valid_size(data):
     max_size = 0
@@ -42,3 +43,42 @@ def get_valid_coins(data, coins, valid_size=None):
     if invalid_coins:
         print(f"invalid_coins: {invalid_coins}, data size not valid")
     return valid_coins
+
+def split_data(data, coins, freq='30D'):
+    df = data[coins[0]]
+    dates = pd.date_range(df.iloc[0].opentime, df.iloc[-1].opentime, freq=freq).to_pydatetime()
+    splits = []
+    for x, y in zip(dates, dates[1:]):
+        split = {}
+        for coin in coins:
+            df = data[coin]
+            split[coin] = df[(df['opentime'] >=x) & (df['opentime']<y)]
+        splits.append(split)
+    return splits
+
+def split_data_rotate(data, coins, freq='30D', rotate_days=180):
+    # rotate_days 整个回看周期是多长时间
+    # freq 每次迭代window move 的时间
+    df = data[coins[0]]
+    dates = pd.date_range(df.iloc[0].opentime, df.iloc[-1].opentime, freq=freq).to_pydatetime()
+    splits = []
+    for x, y in zip(dates, dates[1:]):
+        split = {}
+        for coin in coins:
+            df = data[coin]
+            split[coin] = df[(df['opentime'] >=x) & (df['opentime']< x+timedelta(days=rotate_days))]
+        splits.append(split)
+    return splits
+
+def stats(pnls, timeframe='1d'):
+    pnls['daily_return'] = pnls['total'].pct_change(1)
+    sharpe_days_multiple = {'1d':1,'4h':6, '1h':24}.get(timeframe, 1)
+    sharpe = ((365*sharpe_days_multiple)**0.5)*pnls['daily_return'].mean() / pnls['daily_return'].std()
+    mdd = MDD(pnls.total)
+    pnl = next(iter(pnls.items()))[1] # select first symbol
+    periods = days(pnl)/365 
+    first = pnls.iloc[0]['total']
+    last = pnls.iloc[-1]['total']
+    cagr = CAGR(first, last, periods)
+    calmar = abs(cagr/mdd)
+    return sharpe, mdd, cagr, calmar, first, last

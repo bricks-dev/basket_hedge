@@ -13,4 +13,8 @@ def plot_line(data):
     fig.show()
     #cumresult.plot(figsize=(15, 10)).axhline(color='black', linewidth=2)
 
-
+def plot_pnl(pnls, title):
+    import matplotlib.pyplot as plt
+    plt.style.use('fivethirtyeight')
+    pnls['total'].plot(figsize=(12,8), title=title)
+    plt.show()
