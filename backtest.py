@@ -1,15 +1,7 @@
 import pandas as pd
-from util import key, percentf, stats
+from util import key, percentf, stats, calc_pos
 from plot import plot_pnl
 
-def calc_pos(data, coin, init_value, is_long=True, col='close'):
-    df = data[coin]
-    if is_long:
-        df['norm_return'] = df[col]/df.iloc[0][col]
-    else:
-        df['norm_return'] = 2 - df[col]/df.iloc[0][col]
-    df['position'] = df['norm_return'] * init_value
-    return df['position']
     
 def parse_alloc(coins, alloc, alloc_list):
     return [alloc/len(coins)] * len(coins) if not alloc_list else [float(a) for a in alloc_list.split(",")]
