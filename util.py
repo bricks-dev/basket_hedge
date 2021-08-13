@@ -86,8 +86,9 @@ def stats(pnls, timeframe='1d'):
 def calc_pos(data, coin, init_value, is_long=True, col='close'):
     df = data[coin]
     if is_long:
-        df['norm_return'] = df[col]/df.iloc[0][col]
+        df = df.assign(norm_return=df[col]/df.at[df.index[0],col])
     else:
-        df['norm_return'] = 2 - df[col]/df.iloc[0][col]
+        df = df.assign(norm_return=2 - df[col]/df.at[df.index[0], col])
     df['position'] = df['norm_return'] * init_value
+    data[coin] = df
     return df['position']

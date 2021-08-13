@@ -82,6 +82,7 @@ def rotate(data, coins, timeframe='1d', freq_days=30, rotate_days=180):
 
 
 def main():
+    pd.set_option('mode.chained_assignment','raise')
     parser = argparse.ArgumentParser(
         usage='python rotate.py [-h] coins',
         description='backtest rotate strategy',
