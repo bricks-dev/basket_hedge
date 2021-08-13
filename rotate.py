@@ -2,39 +2,20 @@ import argparse
 from datetime import timedelta
 from backtest import backtest
 from data.data import get_all_price
-import pandas as pd
 from comb import find_best
 from collections import deque, OrderedDict
+from util import split_data, split_data_rotate
 
+def get_basket(baskets, start, default='BTC;BCH'):
+    # 基于当前运行时间段去找basket， basket的结束时间需要和stage2 的start时间在一定范围内
+    for end, item in baskets.items():
+        if start >= end and start <= end + timedelta(days=10):
+            return item
+    return default
 
-def split_data(data, coins, freq='30D'):
-    df = data[coins[0]]
-    dates = pd.date_range(df.iloc[0].opentime, df.iloc[-1].opentime, freq=freq).to_pydatetime()
-    splits = []
-    for x, y in zip(dates, dates[1:]):
-        split = {}
-        for coin in coins:
-            df = data[coin]
-            split[coin] = df[(df['opentime'] >=x) & (df['opentime']<y)]
-        splits.append(split)
-    return splits
-
-def split_data_rotate(data, coins, freq='30D', rotate_days=180):
-    df = data[coins[0]]
-    dates = pd.date_range(df.iloc[0].opentime, df.iloc[-1].opentime, freq=freq).to_pydatetime()
-    splits = []
-    for x, y in zip(dates, dates[1:]):
-        split = {}
-        for coin in coins:
-            df = data[coin]
-            split[coin] = df[(df['opentime'] >=x) & (df['opentime']< x+timedelta(days=rotate_days))]
-        splits.append(split)
-    return splits
-
-
-def stage1(data, coins, rotate_days=180):
+def stage1(data, coins, freq=30, rotate_days=180):
     print("split data ...")
-    batches = split_data_rotate(data, coins, rotate_days=rotate_days)
+    batches = split_data_rotate(data, coins, f'{freq}D', rotate_days=rotate_days)
     best_basket = OrderedDict()
     print("============ stage1: find best basket for each batch =====")
     for i, item in enumerate(batches):
@@ -46,16 +27,10 @@ def stage1(data, coins, rotate_days=180):
         print(f"batch {i}: {start}, {end}, best:{key}")
     return best_basket
 
-def get_basket(baskets, start):
-    # 基于当前运行时间段去找basket， basket的结束时间需要和stage2 的start时间在一定范围内
-    for end, item in baskets.items():
-        if start >= end and start <= end + timedelta(days=10):
-            return item
-    return 'BTC;BCH' 
 
-def stage2(data, coins, best_basket, size=5):
+def stage2(data, coins, best_basket, freq=30, size=5):
     print("split data ...")
-    batches = split_data(data, coins)
+    batches = split_data(data, coins, freq=f'{freq}D')
     print("============ stage2: backtest with best baskets ===========")
     value = 1
     long_queue = deque(maxlen=size)
@@ -78,9 +53,9 @@ def stage2(data, coins, best_basket, size=5):
     return 
 
 
-def rotate(data, coins, rotate_days=180, size=5):
-    best_basket = stage1(data, coins, rotate_days)
-    stage2(data, coins, best_basket, size=size)
+def rotate(data, coins, freq_days=30, rotate_days=180,  size=5):
+    best_basket = stage1(data, coins, freq=freq_days, rotate_days=rotate_days)
+    stage2(data, coins, best_basket, freq=freq_days, size=size)
 
 
 def main():
@@ -92,12 +67,13 @@ def main():
     parser.add_argument('coins', help='coin list to work with', default='BTC,ETH,XRP,EOS,LINK,UNI,TRX,IOST')
     parser.add_argument('-r', '--rotate', help='num of days to rotate', default=180,type=int)
     parser.add_argument('-t', '--timeframe', help='timeframe of ohlcv, 1d/4h/1h/15m/1m', default='1d')
-    parser.add_argument('-a', '--allocate', help='allocate percentage o init money', default=0.5,type=float)
+    parser.add_argument('-f', '--freq', help='freq days', default=30, type=int)
+    parser.add_argument('-m', '--match', help='match all symbol data by start time', default=False, action="store_false")
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
-    data = get_all_price(coins, args.timeframe)
-    rotate(data, coins, args.rotate)
+    new_coins, data = get_all_price(coins, args.timeframe, match=args.match)
+    rotate(data, new_coins, args.freq ,args.rotate)
 
 
 if __name__ == '__main__':

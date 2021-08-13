@@ -57,7 +57,11 @@ result:
 
 每一个月都动态更新当前持仓组合，比如前一段时间(180天)表现最好的是long BTC, short ETH， 则把BTC加入当前long_coins, ETH 加入当前 short_coins。 
 
-```python rotate.py BTC,ETH,BNB,XRP,DOT,UNI,BCH,LTC,SOL,LINK,MATIC,XLM,ETC,THETA -t 1d -r 180```
+* -m 是否对齐所有symbols的数据，如果对齐则需要cut一些币种的数据
+* -f 30 30天重新评估一次是否更新basket
+* -r 180 参考过去180天表现最好的basket来更新当前组合
+
+```python rotate.py BTC,ETH,BNB,XRP,DOT,UNI,BCH,LTC,SOL,LINK,MATIC,XLM,ETC,THETA -t 1d -f 30 -r 180 -m false```
 
 
 ## 动态调整组合的仓位
