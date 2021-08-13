@@ -29,7 +29,7 @@
 
 ```python pnl_file.py ETH,BTC,MATIC,THETA BCH,XRP,EOS  -t 1d```
 
-把简单回测结果保存到./output 文件夹，默认为pickle格式。开发此功能初衷是为了跟海龟策略结合，把basket PNL作为海龟策略的输入。([海龟回测](https://github.com/bricks-dev/backtesting))
+把简单回测结果保存到./output 文件夹，默认为pickle格式。(开发此功能初衷是为了跟海龟策略结合，把basket PNL作为海龟策略的输入，后来发现这个想法有问题。)
 ## 寻找最佳组合
 
 输入 coins 列表，找到表现最好(sharp ratio最高)的 long/short 组合。第一个参数是 coins 列表， 第2/3个参数分别是long/short coins 数量。为了避免回测太慢，这两个数字不应该设置的很大。 
@@ -53,9 +53,19 @@ result:
 ```
 
 
-## 滚动回测/动态组合
+## 滚动回测
 
 每一个月都动态更新当前持仓组合，比如前一段时间(180天)表现最好的是long BTC, short ETH， 则把BTC加入当前long_coins, ETH 加入当前 short_coins。 
 
 ```python rotate.py BTC,ETH,BNB,XRP,DOT,UNI,BCH,LTC,SOL,LINK,MATIC,XLM,ETC,THETA -t 1d -r 180```
 
+
+## 动态调整组合的仓位
+
+检查当前组合多空所占仓位的比例，如果超过最大/最小阈值则重新平衡为初始值(各一半)
+
+* -min 0.3 最小阈值30%
+* -max 0.7 最大阈值30%
+* -f 30 30天检查一次阈值
+
+```python rebalance.py BTC,ETH BCH,EOS -t 4h -min 0.3 -max 0.7 -f 30```

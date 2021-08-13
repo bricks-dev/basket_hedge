@@ -82,3 +82,12 @@ def stats(pnls, timeframe='1d'):
     cagr = CAGR(first, last, periods)
     calmar = abs(cagr/mdd)
     return sharpe, mdd, cagr, calmar, first, last
+
+def calc_pos(data, coin, init_value, is_long=True, col='close'):
+    df = data[coin]
+    if is_long:
+        df['norm_return'] = df[col]/df.iloc[0][col]
+    else:
+        df['norm_return'] = 2 - df[col]/df.iloc[0][col]
+    df['position'] = df['norm_return'] * init_value
+    return df['position']
