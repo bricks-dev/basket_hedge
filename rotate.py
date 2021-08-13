@@ -1,10 +1,13 @@
 import argparse
+import pandas as pd
 from datetime import timedelta
 from backtest import backtest
 from data.data import get_all_price
 from comb import find_best
-from collections import deque, OrderedDict
-from util import split_data, split_data_rotate
+from collections import OrderedDict
+from util import split_data, split_data_rotate, calc_pos, stats, percentf
+from plot import plot_pnl
+
 
 def get_basket(baskets, start, default='BTC;BCH'):
     # 基于当前运行时间段去找basket， basket的结束时间需要和stage2 的start时间在一定范围内
@@ -12,6 +15,20 @@ def get_basket(baskets, start, default='BTC;BCH'):
         if start >= end and start <= end + timedelta(days=10):
             return item
     return default
+
+def backtest(data, long_coins, short_coins, init_value=1, col='close'):
+    all_pos = {}
+    # money allocated to each symbol at first
+    alloc1 = 0.5/ len(long_coins)
+    alloc2 = 0.5/ len(short_coins)
+    for coin in long_coins:
+        all_pos[coin] = calc_pos(data, coin, init_value * alloc1, True, col)
+    for coin in short_coins:
+        all_pos[coin] = calc_pos(data, coin, init_value * alloc2, False, col)
+    pnls = pd.DataFrame(all_pos)
+    pnls.index = data[long_coins[0]].opentime # time
+    pnls['total'] = pnls.sum(axis=1)
+    return pnls.filter(['total'], axis=1)
 
 def stage1(data, coins, freq=30, rotate_days=180):
     print("split data ...")
@@ -29,12 +46,12 @@ def stage1(data, coins, freq=30, rotate_days=180):
 
 
 def stage2(data, coins, best_basket, freq=30):
-    print("split data ...")
     batches = split_data(data, coins, freq=f'{freq}D')
     print("============ stage2: backtest with best baskets ===========")
     value = 1
     long_coins = set()
     short_coins = set()
+    pnls = []
     for i, item in enumerate(batches):
         start = item[coins[0]].iloc[0].opentime
         end = item[coins[0]].iloc[-1].opentime
@@ -47,15 +64,21 @@ def stage2(data, coins, best_basket, freq=30):
         short_coins.add(short_coin)
         long_coins.discard(short_coin)
         short_coins.discard(long_coin)
-        k, sharp, calmar, mdd, cagr, last = backtest(item, list(long_coins), list(short_coins), init_value=value)
-        value = last
-        print(f"{long_coins};{short_coins}, value:{value}")
-    return 
+        pnl = backtest(item, list(long_coins), list(short_coins), init_value=value)
+        pnls.append(pnl)
+        value = pnl.iloc[-1]['total']
+        print(f"{long_coins};{short_coins}, value={value}")
+    pnls = pd.concat(pnls)
+    return pnls
 
 
-def rotate(data, coins, freq_days=30, rotate_days=180):
+
+def rotate(data, coins, timeframe='1d', freq_days=30, rotate_days=180):
     best_basket = stage1(data, coins, freq=freq_days, rotate_days=rotate_days)
-    stage2(data, coins, best_basket, freq=freq_days)
+    pnls = stage2(data, coins, best_basket, freq=freq_days)
+    sharpe, mdd, cagr, calmar, first, last = stats(pnls, timeframe=timeframe)
+    title = f"Rotate Basket, Sharpe: {round(sharpe,2)}, Calmar:{round(calmar,2)}, MDD:{percentf(mdd)}, CAGR:{percentf(cagr)}"
+    plot_pnl(pnls, title)
 
 
 def main():
@@ -76,7 +99,7 @@ def main():
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
     new_coins, data = get_all_price(coins, args.timeframe, match=args.match)
-    rotate(data, new_coins, args.freq ,args.rotate)
+    rotate(data, new_coins, args.timeframe, args.freq ,args.rotate)
 
 
 if __name__ == '__main__':
