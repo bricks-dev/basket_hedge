@@ -68,7 +68,10 @@ def main():
     parser.add_argument('-r', '--rotate', help='num of days to rotate', default=180,type=int)
     parser.add_argument('-t', '--timeframe', help='timeframe of ohlcv, 1d/4h/1h/15m/1m', default='1d')
     parser.add_argument('-f', '--freq', help='freq days', default=30, type=int)
-    parser.add_argument('-m', '--match', help='match all symbol data by start time', default=False, action="store_false")
+    flag_parser = parser.add_mutually_exclusive_group(required=False)
+    flag_parser.add_argument('--match', dest='match', action='store_true')
+    flag_parser.add_argument('--no-match', dest='match', action='store_false')
+    parser.set_defaults(flag=False)
     args = parser.parse_args()
     coins = args.coins.upper().split(',')
     assert args.timeframe in ['1d','4h','1h','15m','1m']
