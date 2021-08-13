@@ -28,13 +28,13 @@ def stage1(data, coins, freq=30, rotate_days=180):
     return best_basket
 
 
-def stage2(data, coins, best_basket, freq=30, size=5):
+def stage2(data, coins, best_basket, freq=30):
     print("split data ...")
     batches = split_data(data, coins, freq=f'{freq}D')
     print("============ stage2: backtest with best baskets ===========")
     value = 1
-    long_queue = deque(maxlen=size)
-    short_queue = deque(maxlen=size)
+    long_coins = set()
+    short_coins = set()
     for i, item in enumerate(batches):
         start = item[coins[0]].iloc[0].opentime
         end = item[coins[0]].iloc[-1].opentime
@@ -43,19 +43,19 @@ def stage2(data, coins, best_basket, freq=30, size=5):
         mcoins = basket.split(";")
         long_coin = mcoins[0]
         short_coin = mcoins[1]
-        if long_coin not in set(long_queue):
-            long_queue.appendleft(long_coin)
-        if short_coin not in set(short_queue):
-            short_queue.appendleft(short_coin)
-        k, sharp, calmar, mdd, cagr, last = backtest(item, list(long_queue), list(short_queue), init_value=value)
+        long_coins.add(long_coin)
+        short_coins.add(short_coin)
+        long_coins.discard(short_coin)
+        short_coins.discard(long_coin)
+        k, sharp, calmar, mdd, cagr, last = backtest(item, list(long_coins), list(short_coins), init_value=value)
         value = last
-        print(f"{list(long_queue)};{list(short_queue)}, value:{value}")
+        print(f"{long_coins};{short_coins}, value:{value}")
     return 
 
 
-def rotate(data, coins, freq_days=30, rotate_days=180,  size=5):
+def rotate(data, coins, freq_days=30, rotate_days=180):
     best_basket = stage1(data, coins, freq=freq_days, rotate_days=rotate_days)
-    stage2(data, coins, best_basket, freq=freq_days, size=size)
+    stage2(data, coins, best_basket, freq=freq_days)
 
 
 def main():
