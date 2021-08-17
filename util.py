@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from itertools import combinations
 from datetime import timedelta
@@ -92,3 +93,17 @@ def calc_pos(data, coin, init_value, is_long=True, col='close'):
     df['position'] = df['norm_return'] * init_value
     data[coin] = df
     return df['position']
+
+def save_file(df, file_name, format='csv'):
+    df['datetime'] = df.index
+    df.set_index('datetime', drop=True, inplace=True)
+    outdir = './output/'
+    if not os.path.exists(outdir):
+        os.mkdir(outdir)
+    if format == 'csv':
+        file_name = f'{outdir}{file_name}.csv'
+        df.to_csv(file_name)
+    elif format == 'pkl':
+        file_name = f'{outdir}{file_name}.pkl'
+        df.to_pickle(file_name)
+    print(f"saving file: {file_name}")
